@@ -97,7 +97,7 @@ export function stringHandler(ptr: i32, size: i32, handler: (request: string) =>
  * Logs request and response.
  *
  */
-export function loggedStringHandler(ptr: usize, size: usize, handler: (request: string) => string, log: (msg: string) => void): usize {
+export function loggedStringHandler(ptr: i32, size: i32, handler: (request: string) => string, log: (msg: string) => void): i32 {
   let strRequest = readRequestString(ptr, size);
   log("Request: " + strRequest);
 
@@ -116,7 +116,7 @@ export function loggedStringHandler(ptr: usize, size: usize, handler: (request: 
  * Reads request as bytes, handles a request and returns pointer on a response.
  *
  */
-export function bytesHandler(ptr: usize, size: usize, handler: (request: Uint8Array) => Uint8Array): usize {
+export function bytesHandler(ptr: i32, size: i32, handler: (request: Uint8Array) => Uint8Array): i32 {
 
   let bytesRequest = readRequestBytes(ptr, size);
 
