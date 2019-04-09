@@ -93,6 +93,26 @@ export function stringHandler(ptr: usize, size: usize, handler: (request: string
 }
 
 /**
+ * Reads request as a string, handles a request and returns pointer on a response.
+ * Logs request and response.
+ *
+ */
+export function loggedStringHandler(ptr: usize, size: usize, handler: (request: string) => string, log: (msg: string) => void): usize {
+  let strRequest = readRequestString(ptr, size);
+  log("Request: " + strRequest);
+
+  let result = handler(strRequest);
+
+  let responseAddr = writeResponseString(result);
+  memory.free(ptr);
+  memory.free(changetype<usize>(strRequest));
+
+  log("Response: " + result);
+
+  return responseAddr;
+}
+
+/**
  * Reads request as bytes, handles a request and returns pointer on a response.
  *
  */
