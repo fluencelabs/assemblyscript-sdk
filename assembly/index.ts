@@ -2,7 +2,7 @@
  * Reads array of bytes from a given `ptr` that has to have `len` bytes size.
  *
  */
-export function readRequestBytes(ptr: usize, size: usize): Uint8Array {
+export function readRequestBytes(ptr: i32, size: i32): Uint8Array {
   let bb: Uint8Array = new Uint8Array(size);
 
   for (let i = 0; i < size; i++) {
@@ -16,7 +16,7 @@ export function readRequestBytes(ptr: usize, size: usize): Uint8Array {
  * Reads string from a given `ptr` that has to have `len` bytes size.
  *
  */
-export function readRequestString(ptr: usize, size: usize): string {
+export function readRequestString(ptr: i32, size: i32): string {
   let bb = readRequestBytes(ptr, size);
   return String.fromUTF8(bb.buffer.data, bb.length);
 }
@@ -33,8 +33,8 @@ export function readRequestString(ptr: usize, size: usize): string {
  *
  * @return response pointer
  */
-export function writeResponseBytes(bb: Uint8Array): usize {
-  let len: usize = bb.length;
+export function writeResponseBytes(bb: Uint8Array): i32 {
+  let len: i32 = bb.length;
   let addr = memory.allocate(len + 4);
   for (let i = 0; i < 4; i++) {
     let b: u8 = (len >> i * 8) as u8 & 0xFF;
@@ -57,8 +57,8 @@ export function writeResponseBytes(bb: Uint8Array): usize {
  * @see `writeResponseBytes`
  * @param response
  */
-export function writeResponseString(response: string): usize {
-  let strLen: usize = response.length;
+export function writeResponseString(response: string): i32 {
+  let strLen: i32 = response.length;
   let addr = memory.allocate(strLen + 4);
   for (let i = 0; i < 4; i++) {
     let b: u8 = (strLen >> i * 8) as u8 & 0xFF;
@@ -79,7 +79,7 @@ export function writeResponseString(response: string): usize {
  * Reads request as a string, handles a request and returns pointer on a response.
  *
  */
-export function stringHandler(ptr: usize, size: usize, handler: (request: string) => string): usize {
+export function stringHandler(ptr: i32, size: i32, handler: (request: string) => string): i32 {
 
   let strRequest = readRequestString(ptr, size);
 
