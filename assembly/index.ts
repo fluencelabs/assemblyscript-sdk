@@ -1,7 +1,6 @@
 /**
- * Read bytes from memory.
- * @param ptr
- * @param size
+ * Reads array of bytes from a given `ptr` that has to have `len` bytes size.
+ *
  */
 export function readRequestBytes(ptr: usize, size: usize): Uint8Array {
   let bb: Uint8Array = new Uint8Array(size);
@@ -13,11 +12,27 @@ export function readRequestBytes(ptr: usize, size: usize): Uint8Array {
   return bb;
 }
 
+/**
+ * Reads string from a given `ptr` that has to have `len` bytes size.
+ *
+ */
 export function readRequestString(ptr: usize, size: usize): string {
   let bb = readRequestBytes(ptr, size);
   return String.fromUTF8(bb.buffer.data, bb.length);
 }
 
+/**
+ * Allocates 'RESPONSE_SIZE_BYTES + response.len()' bytes and writes length of the result as little
+ * endianes RESPONSE_SIZE_BYTES bytes and then writes content of 'result'. So the final layout of
+ * the result in memory is following:
+ *
+ *  | array_length: RESPONSE_SIZE_BYTES bytes (little-endian) | array: $array_length bytes |
+ *
+ * This function should normally be used for returning result of `invoke` function. Vm wrapper
+ * expects result in this format.
+ *
+ * @return response pointer
+ */
 export function writeResponseBytes(bb: Uint8Array): usize {
   let len: usize = bb.length;
   let addr = memory.allocate(len + 4);
@@ -37,6 +52,11 @@ export function writeResponseBytes(bb: Uint8Array): usize {
   return addr;
 }
 
+/**
+ * Converts response to bytes and put it to the memory.
+ * @see `writeResponseBytes`
+ * @param response
+ */
 export function writeResponseString(response: string): usize {
   let strLen: usize = response.length;
   let addr = memory.allocate(strLen + 4);
@@ -55,6 +75,10 @@ export function writeResponseString(response: string): usize {
   return addr;
 }
 
+/**
+ * Reads request as a string, handles a request and returns pointer on a response.
+ *
+ */
 export function stringHandler(ptr: usize, size: usize, handler: (request: string) => string): usize {
 
   let strRequest = readRequestString(ptr, size);
@@ -68,6 +92,10 @@ export function stringHandler(ptr: usize, size: usize, handler: (request: string
   return responseAddr;
 }
 
+/**
+ * Reads request as bytes, handles a request and returns pointer on a response.
+ *
+ */
 export function bytesHandler(ptr: usize, size: usize, handler: (request: Uint8Array) => Uint8Array): usize {
 
   let bytesRequest = readRequestBytes(ptr, size);
