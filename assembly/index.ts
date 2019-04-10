@@ -22,7 +22,10 @@ export function readRequestBytes(ptr: i32, size: i32): Uint8Array {
  */
 export function readRequestString(ptr: i32, size: i32): string {
   let bb = readRequestBytes(ptr, size);
-  return String.fromUTF8(bb.buffer.data, bb.length);
+  let request = String.fromUTF8(bb.buffer.data, bb.length);
+  memory.free(changetype<usize>(bb.buffer));
+  memory.free(changetype<usize>(bb));
+  return request
 }
 
 /**
@@ -75,7 +78,6 @@ export function writeResponseString(response: string): i32 {
     store<u8>(strAddr + i, b);
   }
 
-  memory.free(changetype<usize>(response));
   return addr;
 }
 
@@ -92,6 +94,7 @@ export function stringHandler(ptr: i32, size: i32, handler: (request: string) =>
   let responseAddr = writeResponseString(response);
   memory.free(ptr);
   memory.free(changetype<usize>(strRequest));
+  memory.free(changetype<usize>(response));
 
   return responseAddr;
 }
@@ -112,6 +115,8 @@ export function loggedStringHandler(ptr: i32, size: i32, handler: (request: stri
   memory.free(changetype<usize>(strRequest));
 
   log("Response: " + response);
+
+  memory.free(changetype<usize>(response));
 
   return responseAddr;
 }
