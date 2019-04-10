@@ -1,3 +1,5 @@
+const RESPONSE_SIZE_BYTES = 4;
+
 /**
  * Reads array of bytes from a given `ptr` that has to have `len` bytes size.
  *
@@ -8,6 +10,8 @@ export function readRequestBytes(ptr: i32, size: i32): Uint8Array {
   for (let i = 0; i < size; i++) {
     bb[i] = load<u8>(ptr + i)
   }
+
+  memory.free(changetype<usize>(ptr));
 
   return bb;
 }
@@ -33,22 +37,22 @@ export function readRequestString(ptr: i32, size: i32): string {
  *
  * @return response pointer
  */
-export function writeResponseBytes(bb: Uint8Array): i32 {
-  let len: i32 = bb.length;
-  let addr = memory.allocate(len + 4);
-  for (let i = 0; i < 4; i++) {
+export function writeResponseBytes(response: Uint8Array): i32 {
+  let len: i32 = response.length;
+  let addr = memory.allocate(len + RESPONSE_SIZE_BYTES);
+  for (let i = 0; i < RESPONSE_SIZE_BYTES; i++) {
     let b: u8 = (len >> i * 8) as u8 & 0xFF;
     store<u8>(addr + i, b);
   }
 
-  let responseAddr = addr + 4;
+  let responseAddr = addr + RESPONSE_SIZE_BYTES;
   for (let i = 0; i < len; i++) {
-    let b: u8 = bb[i];
+    let b: u8 = response[i];
     store<u8>(responseAddr + i, b);
   }
 
-  memory.free(changetype<usize>(bb.buffer));
-  memory.free(changetype<usize>(bb));
+  memory.free(changetype<usize>(response.buffer));
+  memory.free(changetype<usize>(response));
   return addr;
 }
 
@@ -59,13 +63,13 @@ export function writeResponseBytes(bb: Uint8Array): i32 {
  */
 export function writeResponseString(response: string): i32 {
   let strLen: i32 = response.length;
-  let addr = memory.allocate(strLen + 4);
-  for (let i = 0; i < 4; i++) {
+  let addr = memory.allocate(strLen + RESPONSE_SIZE_BYTES);
+  for (let i = 0; i < RESPONSE_SIZE_BYTES; i++) {
     let b: u8 = (strLen >> i * 8) as u8 & 0xFF;
     store<u8>(addr + i, b);
   }
 
-  let strAddr = addr + 4;
+  let strAddr = addr + RESPONSE_SIZE_BYTES;
   for (let i = 0; i < strLen; i++) {
     let b: u8 = response.charCodeAt(i) as u8;
     store<u8>(strAddr + i, b);
