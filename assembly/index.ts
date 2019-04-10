@@ -26,14 +26,14 @@ export function readRequestString(ptr: i32, size: i32): string {
 }
 
 /**
- * Allocates 'RESPONSE_SIZE_BYTES + response.len()' bytes and writes length of the result as little
- * endianes RESPONSE_SIZE_BYTES bytes and then writes content of 'result'. So the final layout of
- * the result in memory is following:
+ * Allocates 'RESPONSE_SIZE_BYTES + response.len()' bytes and writes length of the response as little
+ * endianes RESPONSE_SIZE_BYTES bytes and then writes content of 'response'. So the final layout of
+ * the response in memory is following:
  *
  *  | array_length: RESPONSE_SIZE_BYTES bytes (little-endian) | array: $array_length bytes |
  *
- * This function should normally be used for returning result of `invoke` function. Vm wrapper
- * expects result in this format.
+ * This function should normally be used for returning response of `invoke` function. Vm wrapper
+ * expects response in this format.
  *
  * @return response pointer
  */
@@ -87,9 +87,9 @@ export function stringHandler(ptr: i32, size: i32, handler: (request: string) =>
 
   let strRequest = readRequestString(ptr, size);
 
-  let result = handler(strRequest);
+  let response = handler(strRequest);
 
-  let responseAddr = writeResponseString(result);
+  let responseAddr = writeResponseString(response);
   memory.free(ptr);
   memory.free(changetype<usize>(strRequest));
 
@@ -105,13 +105,13 @@ export function loggedStringHandler(ptr: i32, size: i32, handler: (request: stri
   let strRequest = readRequestString(ptr, size);
   log("Request: " + strRequest);
 
-  let result = handler(strRequest);
+  let response = handler(strRequest);
 
-  let responseAddr = writeResponseString(result);
+  let responseAddr = writeResponseString(response);
   memory.free(ptr);
   memory.free(changetype<usize>(strRequest));
 
-  log("Response: " + result);
+  log("Response: " + response);
 
   return responseAddr;
 }
@@ -124,9 +124,9 @@ export function bytesHandler(ptr: i32, size: i32, handler: (request: Uint8Array)
 
   let bytesRequest = readRequestBytes(ptr, size);
 
-  let result = handler(bytesRequest);
+  let response = handler(bytesRequest);
 
-  let responseAddr = writeResponseBytes(result);
+  let responseAddr = writeResponseBytes(response);
   memory.free(ptr);
   memory.free(changetype<usize>(bytesRequest));
 
