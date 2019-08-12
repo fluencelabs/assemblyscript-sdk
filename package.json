@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/fluencelabs/assemblyscript-sdk#readme",
   "devDependencies": {
-    "assemblyscript": "github:AssemblyScript/assemblyscript"
+    "assemblyscript": "assemblyscript/assemblyscript"
   }
 }

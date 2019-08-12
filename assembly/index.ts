@@ -11,7 +11,7 @@ export function readRequestBytes(ptr: i32, size: i32): Uint8Array {
     bb[i] = load<u8>(ptr + i)
   }
 
-  memory.free(changetype<usize>(ptr));
+  __free(changetype<usize>(ptr));
 
   return bb;
 }
@@ -22,9 +22,8 @@ export function readRequestBytes(ptr: i32, size: i32): Uint8Array {
  */
 export function readRequestString(ptr: i32, size: i32): string {
   let bb = readRequestBytes(ptr, size);
-  let request = String.fromUTF8(bb.buffer.data, bb.length);
-  memory.free(changetype<usize>(bb.buffer));
-  memory.free(changetype<usize>(bb));
+  let request = String.UTF8.decode(bb.buffer);
+  __free(changetype<usize>(bb));
   return request
 }
 
@@ -42,7 +41,7 @@ export function readRequestString(ptr: i32, size: i32): string {
  */
 export function writeResponseBytes(response: Uint8Array): i32 {
   let len: i32 = response.length;
-  let addr = memory.allocate(len + RESPONSE_SIZE_BYTES);
+  let addr = __alloc(len + RESPONSE_SIZE_BYTES, 1);
   for (let i = 0; i < RESPONSE_SIZE_BYTES; i++) {
     let b: u8 = (len >> i * 8) as u8 & 0xFF;
     store<u8>(addr + i, b);
@@ -54,8 +53,8 @@ export function writeResponseBytes(response: Uint8Array): i32 {
     store<u8>(responseAddr + i, b);
   }
 
-  memory.free(changetype<usize>(response.buffer));
-  memory.free(changetype<usize>(response));
+  __free(changetype<usize>(response.buffer));
+  __free(changetype<usize>(response));
   return addr;
 }
 
@@ -66,7 +65,7 @@ export function writeResponseBytes(response: Uint8Array): i32 {
  */
 export function writeResponseString(response: string): i32 {
   let strLen: i32 = response.length;
-  let addr = memory.allocate(strLen + RESPONSE_SIZE_BYTES);
+  let addr = __alloc(strLen + RESPONSE_SIZE_BYTES, 1);
   for (let i = 0; i < RESPONSE_SIZE_BYTES; i++) {
     let b: u8 = (strLen >> i * 8) as u8 & 0xFF;
     store<u8>(addr + i, b);
@@ -92,9 +91,9 @@ export function stringHandler(ptr: i32, size: i32, handler: (request: string) =>
   let response = handler(strRequest);
 
   let responseAddr = writeResponseString(response);
-  memory.free(ptr);
-  memory.free(changetype<usize>(strRequest));
-  memory.free(changetype<usize>(response));
+  __free(ptr);
+  __free(changetype<usize>(strRequest));
+  __free(changetype<usize>(response));
 
   return responseAddr;
 }
@@ -111,12 +110,12 @@ export function loggedStringHandler(ptr: i32, size: i32, handler: (request: stri
   let response = handler(strRequest);
 
   let responseAddr = writeResponseString(response);
-  memory.free(ptr);
-  memory.free(changetype<usize>(strRequest));
+  __free(ptr);
+  __free(changetype<usize>(strRequest));
 
   log("Response: " + response);
 
-  memory.free(changetype<usize>(response));
+  __free(changetype<usize>(response));
 
   return responseAddr;
 }
@@ -132,8 +131,8 @@ export function bytesHandler(ptr: i32, size: i32, handler: (request: Uint8Array)
   let response = handler(bytesRequest);
 
   let responseAddr = writeResponseBytes(response);
-  memory.free(ptr);
-  memory.free(changetype<usize>(bytesRequest));
+  __free(ptr);
+  __free(changetype<usize>(bytesRequest));
 
   return responseAddr;
 }

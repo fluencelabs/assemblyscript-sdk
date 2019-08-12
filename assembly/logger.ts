@@ -9,7 +9,7 @@ export function log(message: string): void {
         let b: u8 = messageStr.charCodeAt(i) as u8;
         write(b);
     }
-    memory.free(changetype<usize>(message));
-    memory.free(changetype<usize>(messageStr));
+    __free(changetype<usize>(message));
+    __free(changetype<usize>(messageStr));
     flush();
 }
