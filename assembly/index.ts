@@ -41,7 +41,7 @@ export function readRequestString(ptr: i32, size: i32): string {
  */
 export function writeResponseBytes(response: Uint8Array): i32 {
   let len: i32 = response.length;
-  let addr = __alloc(len + RESPONSE_SIZE_BYTES, 1);
+  let addr = __alloc(len + RESPONSE_SIZE_BYTES, 0);
   for (let i = 0; i < RESPONSE_SIZE_BYTES; i++) {
     let b: u8 = (len >> i * 8) as u8 & 0xFF;
     store<u8>(addr + i, b);
@@ -65,7 +65,7 @@ export function writeResponseBytes(response: Uint8Array): i32 {
  */
 export function writeResponseString(response: string): i32 {
   let strLen: i32 = response.length;
-  let addr = __alloc(strLen + RESPONSE_SIZE_BYTES, 1);
+  let addr = __alloc(strLen + RESPONSE_SIZE_BYTES, 0);
   for (let i = 0; i < RESPONSE_SIZE_BYTES; i++) {
     let b: u8 = (strLen >> i * 8) as u8 & 0xFF;
     store<u8>(addr + i, b);
